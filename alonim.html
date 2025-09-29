@@ -23,47 +23,48 @@
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <h2>איש צוות מבצע</h2>
-    <select id="staffSelect">
-      <option value="">טוען נתונים...</option>
-    </select>
-  </div>
-
-  <script>
-    // שלב 1: נטען את הנתונים מהוובהוק/שרת
-    fetch("https://hook.eu2.make.com/dh8viscbr1lq21lxcswre508r2osps1v") // כאן לשים את ה-Webhook שלך שמחזיר רשימת שמות
-      .then(res => res.json())
-      .then(data => {
-        const select = document.getElementById("staffSelect");
-        select.innerHTML = '<option value="">בחר איש צוות</option>';
-
-        // נניח שהוובהוק מחזיר מערך של שמות
-        data.forEach(name => {
-          const option = document.createElement("option");
-          option.value = name;
-          option.textContent = name;
-          select.appendChild(option);
-        });
-      })
-      .catch(err => {
-        document.getElementById("staffSelect").innerHTML =
-          '<option value="">שגיאה בטעינה</option>';
-        console.error(err);
-      });
-
-    // שלב 2: ברגע שבוחרים → נשלח בחירה חזרה ל-Make
-    document.getElementById("staffSelect").addEventListener("change", function() {
-      const staff = this.value;
-      if (!staff) return;
-
-      fetch("https://hook.eu1.make.com/YYYYYY", { // וובהוק אחר לשליחה חזרה ל-Make
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ selectedStaff: staff })
-      });
-    });
-  </script>
-</body>
+<body onload="loadStaff()">
+    <div class="container">
+      <h2>איש צוות מבצע</h2>
+      <select id="staffSelect">
+        <option value="">טוען נתונים...</option>
+      </select>
+    </div>
+  
+    <script>
+      function loadStaff() {
+        // קריאה ל־Webhook של Make שמחזיר רשימת אנשי צוות
+        fetch("https://hook.eu2.make.com/dh8viscbr1lq21lxcswre508r2osps1v")
+          .then(res => res.json())
+          .then(data => {
+            const select = document.getElementById("staffSelect");
+            select.innerHTML = '<option value="">בחר איש צוות</option>';
+  
+            data.forEach(name => {
+              const option = document.createElement("option");
+              option.value = name;
+              option.textContent = name;
+              select.appendChild(option);
+            });
+  
+            // מאזין לבחירה ושליחה חזרה ל-Make
+            select.addEventListener("change", function() {
+              if (this.value) {
+                fetch("https://hook.eu1.make.com/YYYYYY", {
+                  method: "POST",
+                  headers: {"Content-Type": "application/json"},
+                  body: JSON.stringify({ selectedStaff: this.value })
+                });
+              }
+            });
+          })
+          .catch(err => {
+            const select = document.getElementById("staffSelect");
+            select.innerHTML = '<option value="">שגיאה בטעינה</option>';
+            console.error(err);
+          });
+      }
+    </script>
+  </body>
+  
 </html>
